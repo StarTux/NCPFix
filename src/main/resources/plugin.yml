@@ -1,0 +1,13 @@
+name: NCPFix
+description: Disable NCP under circumstances where it negatively affects enjoyment of the game
+author: StarTux
+version: 0.1
+website: http://cavetale.com
+api-version: 1.13
+main: com.cavetale.ncpfix.NCPFix
+depend: []
+softdepend: []
+permissions:
+  ncpfix.remove:
+    default: false
+    description: Have your NCP warnings levels reset when you join
