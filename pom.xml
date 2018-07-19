@@ -13,6 +13,10 @@
   <repositories>
     <!-- Spigot Repo -->
     <repository>
+      <id>cavetale-repo</id>
+      <url>https://cavetale.com/jenkins/plugin/repository/everything/</url>
+    </repository>
+    <repository>
       <id>spigot-repo</id>
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
@@ -33,9 +37,9 @@
     </dependency>
     <!-- NoCheatPlus -->
     <dependency>
-      <groupId>fr.neatmonster.nocheatplus</groupId>
-      <artifactId>NoCheatPlus</artifactId>
-      <version>3.16.0</version>
+      <groupId>fr.neatmonster</groupId>
+      <artifactId>nocheatplus</artifactId>
+      <version>3.16.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
