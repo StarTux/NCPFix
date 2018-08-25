@@ -1,4 +1,4 @@
-package com.winthier.ncpfix;
+package com.cavetale.ncpfix;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
