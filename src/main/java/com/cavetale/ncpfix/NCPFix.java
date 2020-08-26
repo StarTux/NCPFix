@@ -57,7 +57,7 @@ public final class NCPFix extends JavaPlugin implements Listener {
             Bukkit.getScheduler().runTaskLater(this, () -> {
                     exempt(player, CheckType.MOVING_SURVIVALFLY, false);
                     exempt(player, CheckType.MOVING_CREATIVEFLY, false);
-                }, 20L);
+                }, 60L);
         }
     }
 
