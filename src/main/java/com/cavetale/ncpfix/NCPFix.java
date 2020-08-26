@@ -55,8 +55,10 @@ public final class NCPFix extends JavaPlugin implements Listener {
             exempt(player, CheckType.MOVING_CREATIVEFLY, true);
         } else {
             Bukkit.getScheduler().runTaskLater(this, () -> {
-                    exempt(player, CheckType.MOVING_SURVIVALFLY, false);
-                    exempt(player, CheckType.MOVING_CREATIVEFLY, false);
+                    if (player.isOnline() && !player.isGliding()) {
+                        exempt(player, CheckType.MOVING_SURVIVALFLY, false);
+                        exempt(player, CheckType.MOVING_CREATIVEFLY, false);
+                    }
                 }, 60L);
         }
     }
