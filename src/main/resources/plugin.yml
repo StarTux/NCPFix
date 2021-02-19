@@ -7,7 +7,17 @@ api-version: 1.13
 main: com.cavetale.ncpfix.NCPFix
 depend: [NoCheatPlus]
 softdepend: []
+commands:
+  ncpfix:
+    description: Debug command
+    usage: /ncpfix
+    permission: ncpfix.ncpfix
+
 permissions:
+  ncpfix.ncpfix:
+    description: use /ncpfix
+    default: op
+
   ncpfix.remove:
-    default: false
     description: Have your NCP warnings levels reset when you join
+    default: false
