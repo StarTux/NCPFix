@@ -39,7 +39,8 @@ public final class NCPFix extends JavaPlugin implements Listener {
         sender.sendMessage(tasks.size() + " tasks:");
         for (ExemptTask task : tasks.values()) {
             long time = task.getTimeout() - System.currentTimeMillis();
-            sender.sendMessage("- " + task.getPlayer().getName() + ": " + time);
+            sender.sendMessage("- " + task.getPlayer().getName() + ": " + time
+                               + (task.getPlayer().isGliding() ? " (glide)" : ""));
         }
         return true;
     }
