@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRiptideEvent;
@@ -71,6 +72,13 @@ public final class NCPFix extends JavaPlugin implements Listener {
         if (player.hasPermission("ncpfix.remove")) {
             getServer().dispatchCommand(getServer().getConsoleSender(), "ncp removeplayer " + player.getName());
         }
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        ExemptTask task = tasks.remove(player.getUniqueId());
+        if (task != null) task.stop();
     }
 
     /**

@@ -44,10 +44,15 @@ final class ExemptTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (!player.isValid()) {
+        if (!player.isOnline()) {
             stop();
             plugin.removeTask(player.getUniqueId());
             plugin.getLogger().warning("Player went missing: " + player.getName());
+            return;
+        }
+        if (player.isDead()) {
+            stop();
+            plugin.removeTask(player.getUniqueId());
             return;
         }
         if (player.isGliding()) return;
