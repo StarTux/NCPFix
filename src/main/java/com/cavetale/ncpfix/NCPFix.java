@@ -99,7 +99,7 @@ public final class NCPFix extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerRiptide(PlayerRiptideEvent event) {
         Player player = event.getPlayer();
-        timedExempt(player, 3000L);
+        timedExempt(player, 5000L);
     }
 
     void exempt(Player player, CheckType type, boolean exempt) {
