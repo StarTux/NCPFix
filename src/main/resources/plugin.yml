@@ -10,7 +10,10 @@ softdepend: []
 commands:
   ncpfix:
     description: Debug command
-    usage: /ncpfix
+    usage: |-
+      /ncpfix info - Print info
+      /ncpfix debug - Toggle debug (player)
+      /ncpfix me - Self info (player)
     permission: ncpfix.ncpfix
 
 permissions:

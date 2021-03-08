@@ -1,9 +1,11 @@
 package com.cavetale.ncpfix;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
+import fr.neatmonster.nocheatplus.hooks.NCPHookManager;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,14 +22,23 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class NCPFix extends JavaPlugin implements Listener {
     private Map<UUID, ExemptTask> tasks = new HashMap<>();
+    private Set<UUID> debugs = new HashSet<>();
+    private Set<UUID> exempts = new HashSet<>();
+    private FixHook fixHook = new FixHook(this);
+    public static final CheckType[] CHECKS = {
+        CheckType.MOVING_SURVIVALFLY,
+        //CheckType.MOVING_CREATIVEFLY
+    };
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
+        NCPHookManager.addHook(CHECKS, fixHook);
     }
 
     @Override
     public void onDisable() {
+        NCPHookManager.removeHook(fixHook);
         for (ExemptTask task : tasks.values()) {
             task.stop();
         }
@@ -36,14 +47,40 @@ public final class NCPFix extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length != 0) return false;
-        sender.sendMessage(tasks.size() + " tasks:");
-        for (ExemptTask task : tasks.values()) {
-            long time = task.getTimeout() - System.currentTimeMillis();
-            sender.sendMessage("- " + task.getPlayer().getName() + ": " + time
-                               + (task.getPlayer().isGliding() ? " (glide)" : ""));
+        if (args.length == 0) return false;
+        Player player = sender instanceof Player ? (Player) sender : null;
+        switch (args[0]) {
+        case "info": {
+            sender.sendMessage(tasks.size() + " tasks:");
+            for (ExemptTask task : tasks.values()) {
+                long time = task.getTimeout() - System.currentTimeMillis();
+                sender.sendMessage("- " + task.getPlayer().getName() + ": " + time
+                                   + (task.getPlayer().isGliding() ? " (glide)" : ""));
+            }
+            return true;
         }
-        return true;
+        case "debug": {
+            if (player == null) {
+                sender.sendMessage("[NCPFix] Player expected!");
+                return true;
+            }
+            if (debugs.contains(player.getUniqueId())) {
+                debugs.remove(player.getUniqueId());
+                player.sendMessage("Debug mode disabled");
+            } else {
+                debugs.add(player.getUniqueId());
+                player.sendMessage("Debug mode enabled");
+            }
+            return true;
+        }
+        case "me": {
+            ExemptTask task = tasks.get(player.getUniqueId());
+            sender.sendMessage("task: " + (task != null ? "" + task.getTimeLeft() : "none"));
+            sender.sendMessage("exempt: " + isExempt(player));
+            return true;
+        }
+        default: return false;
+        }
     }
 
     /**
@@ -65,6 +102,8 @@ public final class NCPFix extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        debugs.remove(player.getUniqueId());
+        exempts.remove(player.getUniqueId());
         ExemptTask task = tasks.remove(player.getUniqueId());
         if (task != null) {
             task.stop();
@@ -77,6 +116,9 @@ public final class NCPFix extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
+        if (debugs.contains(player.getUniqueId())) {
+            player.sendMessage("[NCPFix] " + event.getEventName());
+        }
         ExemptTask task = tasks.remove(player.getUniqueId());
         if (task != null) task.stop();
     }
@@ -89,6 +131,9 @@ public final class NCPFix extends JavaPlugin implements Listener {
     public void onEntityToggleGlide(EntityToggleGlideEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
+        if (debugs.contains(player.getUniqueId())) {
+            player.sendMessage("[NCPFix] " + event.getEventName() + " " + event.isGliding());
+        }
         if (event.isGliding()) {
             timedExempt(player, 0L);
         } else {
@@ -99,16 +144,29 @@ public final class NCPFix extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerRiptide(PlayerRiptideEvent event) {
         Player player = event.getPlayer();
-        timedExempt(player, 5000L);
+        if (debugs.contains(player.getUniqueId())) {
+            player.sendMessage("[NCPFix] " + event.getEventName());
+        }
+        timedExempt(player, 3000L);
+        if (player.isGliding()) {
+            player.setGliding(false);
+        }
     }
 
-    void exempt(Player player, CheckType type, boolean exempt) {
+    boolean isExempt(Player player) {
+        return exempts.contains(player.getUniqueId());
+    }
+
+    void exempt(Player player, boolean exempt) {
         if (!player.isOnline()) return;
-        if (NCPExemptionManager.isExempted(player, type) == exempt) return;
+        if (isExempt(player) == exempt) return;
+        if (debugs.contains(player.getUniqueId())) {
+            player.sendMessage("[NCPFix] exempt " + exempt);
+        }
         if (exempt) {
-            NCPExemptionManager.exemptPermanently(player, type);
+            exempts.add(player.getUniqueId());
         } else {
-            NCPExemptionManager.unexempt(player, type);
+            exempts.remove(player.getUniqueId());
         }
     }
 
@@ -116,6 +174,9 @@ public final class NCPFix extends JavaPlugin implements Listener {
      * Exempt the player for some milliseconds in real time.
      */
     public void timedExempt(Player player, long time) {
+        if (debugs.contains(player.getUniqueId())) {
+            player.sendMessage("[NCPFix] exempt " + time);
+        }
         ExemptTask task = tasks.computeIfAbsent(player.getUniqueId(), u -> new ExemptTask(this, player).start());
         task.setTimeout(System.currentTimeMillis() + time);
     }
@@ -126,5 +187,9 @@ public final class NCPFix extends JavaPlugin implements Listener {
      */
     void removeTask(UUID uuid) {
         tasks.remove(uuid);
+    }
+
+    public boolean isDebug(Player player) {
+        return debugs.contains(player.getUniqueId());
     }
 }

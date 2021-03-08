@@ -1,6 +1,5 @@
 package com.cavetale.ncpfix;
 
-import fr.neatmonster.nocheatplus.checks.CheckType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,7 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 final class ExemptTask extends BukkitRunnable {
     private final NCPFix plugin;
     private final Player player;
-    @Setter private long timeout;
+    @Setter protected long timeout;
 
     public ExemptTask start() {
         runTaskTimer(plugin, 0L, 1L);
@@ -33,13 +32,11 @@ final class ExemptTask extends BukkitRunnable {
     }
 
     private void exempt() {
-        plugin.exempt(player, CheckType.MOVING_SURVIVALFLY, true);
-        plugin.exempt(player, CheckType.MOVING_CREATIVEFLY, true);
+        plugin.exempt(player, true);
     }
 
     private void unexempt() {
-        plugin.exempt(player, CheckType.MOVING_SURVIVALFLY, false);
-        plugin.exempt(player, CheckType.MOVING_CREATIVEFLY, false);
+        plugin.exempt(player, false);
     }
 
     @Override
@@ -61,5 +58,9 @@ final class ExemptTask extends BukkitRunnable {
             stop();
             plugin.removeTask(player.getUniqueId());
         }
+    }
+
+    public long getTimeLeft() {
+        return timeout - System.currentTimeMillis();
     }
 }
