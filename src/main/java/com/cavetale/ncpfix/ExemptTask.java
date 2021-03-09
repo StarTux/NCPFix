@@ -18,7 +18,7 @@ final class ExemptTask extends BukkitRunnable {
 
     public ExemptTask start() {
         runTaskTimer(plugin, 0L, 1L);
-        exempt();
+        plugin.exempt(player, true);
         return this;
     }
 
@@ -27,16 +27,8 @@ final class ExemptTask extends BukkitRunnable {
      * from the plugin's map!
      */
     public void stop() {
-        unexempt();
-        cancel();
-    }
-
-    private void exempt() {
-        plugin.exempt(player, true);
-    }
-
-    private void unexempt() {
         plugin.exempt(player, false);
+        cancel();
     }
 
     @Override

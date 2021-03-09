@@ -1,6 +1,7 @@
 package com.cavetale.ncpfix;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import fr.neatmonster.nocheatplus.hooks.NCPHookManager;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,8 +27,7 @@ public final class NCPFix extends JavaPlugin implements Listener {
     private Set<UUID> exempts = new HashSet<>();
     private FixHook fixHook = new FixHook(this);
     public static final CheckType[] CHECKS = {
-        CheckType.MOVING_SURVIVALFLY,
-        //CheckType.MOVING_CREATIVEFLY
+        CheckType.MOVING_SURVIVALFLY
     };
 
     @Override
@@ -55,7 +55,9 @@ public final class NCPFix extends JavaPlugin implements Listener {
             for (ExemptTask task : tasks.values()) {
                 long time = task.getTimeout() - System.currentTimeMillis();
                 sender.sendMessage("- " + task.getPlayer().getName() + ": " + time
-                                   + (task.getPlayer().isGliding() ? " (glide)" : ""));
+                                   + (task.getPlayer().isGliding() ? " (glide)" : "")
+                                   + " exempt=" + isExempt(player)
+                                   + " ncpExempt=" + NCPExemptionManager.isExempted(player, CheckType.MOVING_SURVIVALFLY));
             }
             return true;
         }
@@ -77,6 +79,7 @@ public final class NCPFix extends JavaPlugin implements Listener {
             ExemptTask task = tasks.get(player.getUniqueId());
             sender.sendMessage("task: " + (task != null ? "" + task.getTimeLeft() : "none"));
             sender.sendMessage("exempt: " + isExempt(player));
+            sender.sendMessage("ncp-exempt: " + NCPExemptionManager.isExempted(player, CheckType.MOVING_SURVIVALFLY));
             return true;
         }
         default: return false;
@@ -165,8 +168,10 @@ public final class NCPFix extends JavaPlugin implements Listener {
         }
         if (exempt) {
             exempts.add(player.getUniqueId());
+            NCPExemptionManager.exemptPermanently(player, CheckType.MOVING_SURVIVALFLY);
         } else {
             exempts.remove(player.getUniqueId());
+            NCPExemptionManager.unexempt(player, CheckType.MOVING_SURVIVALFLY);
         }
     }
 
