@@ -3,6 +3,7 @@ package com.cavetale.ncpfix;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import fr.neatmonster.nocheatplus.hooks.NCPHookManager;
+import fr.neatmonster.nocheatplus.players.DataManager;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -172,6 +173,7 @@ public final class NCPFix extends JavaPlugin implements Listener {
         } else {
             exempts.remove(player.getUniqueId());
             NCPExemptionManager.unexempt(player, CheckType.MOVING_SURVIVALFLY);
+            DataManager.removeData(player.getName(), CheckType.MOVING_SURVIVALFLY);
         }
     }
 
