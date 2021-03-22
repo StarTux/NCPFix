@@ -28,7 +28,8 @@ public final class NCPFix extends JavaPlugin implements Listener {
     private Set<UUID> exempts = new HashSet<>();
     private FixHook fixHook = new FixHook(this);
     public static final CheckType[] CHECKS = {
-        CheckType.MOVING_SURVIVALFLY
+        CheckType.MOVING_SURVIVALFLY,
+        CheckType.MOVING_CREATIVEFLY
     };
 
     @Override
@@ -169,11 +170,15 @@ public final class NCPFix extends JavaPlugin implements Listener {
         }
         if (exempt) {
             exempts.add(player.getUniqueId());
-            NCPExemptionManager.exemptPermanently(player, CheckType.MOVING_SURVIVALFLY);
+            for (CheckType checkType : CHECKS) {
+                NCPExemptionManager.exemptPermanently(player, checkType);
+            }
         } else {
             exempts.remove(player.getUniqueId());
-            NCPExemptionManager.unexempt(player, CheckType.MOVING_SURVIVALFLY);
-            DataManager.removeData(player.getName(), CheckType.MOVING_SURVIVALFLY);
+            for (CheckType checkType : CHECKS) {
+                NCPExemptionManager.unexempt(player, checkType);
+                DataManager.removeData(player.getName(), checkType);
+            }
         }
     }
 
