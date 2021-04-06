@@ -95,8 +95,10 @@ public final class NCPFix extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (!player.hasPermission("ncpfix.remove")) return;
-        getServer().dispatchCommand(getServer().getConsoleSender(), "ncp removeplayer " + player.getName());
+        if (player.hasPermission("ncpfix.remove")) {
+            getServer().dispatchCommand(getServer().getConsoleSender(), "ncp removeplayer " + player.getName());
+        }
+        timedExempt(player, 5000L);
     }
 
     /**
@@ -142,7 +144,7 @@ public final class NCPFix extends JavaPlugin implements Listener {
         if (event.isGliding()) {
             timedExempt(player, 0L);
         } else {
-            timedExempt(player, 3000L);
+            timedExempt(player, 5000L);
         }
     }
 
@@ -166,7 +168,7 @@ public final class NCPFix extends JavaPlugin implements Listener {
         if (!player.isOnline()) return;
         if (isExempt(player) == exempt) return;
         if (debugs.contains(player.getUniqueId())) {
-            player.sendMessage("[NCPFix] exempt " + exempt);
+            player.sendMessage("[NCPFix] exempt " + (exempt ? "ON" : "OFF"));
         }
         if (exempt) {
             exempts.add(player.getUniqueId());
@@ -186,9 +188,6 @@ public final class NCPFix extends JavaPlugin implements Listener {
      * Exempt the player for some milliseconds in real time.
      */
     public void timedExempt(Player player, long time) {
-        if (debugs.contains(player.getUniqueId())) {
-            player.sendMessage("[NCPFix] exempt " + time);
-        }
         ExemptTask task = tasks.computeIfAbsent(player.getUniqueId(), u -> new ExemptTask(this, player).start());
         task.setTimeout(System.currentTimeMillis() + time);
     }
